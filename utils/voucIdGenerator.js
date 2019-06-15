@@ -1,7 +1,8 @@
 const shortId=require('shortid');
+shortId.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$@');
 const voucIdGenerator = {
     generateId(){
-        return shortId.generate();
+        return "VI" + "JMN" + shortId.generate();
     },
     generateCode() {
         let smallCode=shortId.generate();

@@ -3,27 +3,55 @@ const templateSchema=require('../models/templateSchema');
 const config = require('../../utils/config');
 const voucherOperations = {
     findTemplateData(templateId) {
-        templateSchema.findOne({"templateId":templateId},(err,data)=> {
+        return new Promise((resolve,reject)=> { 
+        templateSchema.findOne({templateId:templateId},(err,data)=> {
             if(err) {
-                return null;
+                reject(null);
             }
             else {
-                return data;
+                resolve(data);
             }
+        });
         });
     },
-    uploadDatavouch(vouchArray,res) {
-        voucherModel.create(vouchArray,(err)=> {
-            if(err) {
-                res.status(500).json({"status":config.ERROR,"message":"Error in adding voucher to database"});
+    uploadDatavouch(allVouchers,res) {
+        voucherModel.findOne({},(err,docs)=> {
+            if(err){
+                res.status(500).json({"message":"Error while finding the document in Voucher CRUD","Status":config.ERROR});
             }
-            else{
-                res.status(200).json({"status":config.SUCCESS,"message":"Successfully added vouchers"});
+            else if(!docs) {
+                voucherModel.create(allVouchers,(err)=> {
+                    if(err) {
+                        res.status(500).json({"message":"Unable to add to the database ","Status":config.ERROR});
+                            }
+                    else{
+                        res.status(200).json({"message":"Added to database Successfully","Status":config.SUCCESS,"data":allVouchers});
+                        allVouchers.length=0;
+                            }
+            });
             }
-        });
+            else {
+                voucherModel.findOneAndUpdate({"currentStatus":true},{"currentStatus":false},(err,docs)=> {
+                    if(err) {
+                        res.status(500).json({"message":"Can't find and update in the voucher CRUD","Status":config.ERROR});
+                    }
+                    else {
+                        voucherModel.create(allVouchers,(err)=> {
+                            if(err) {
+                                res.status(500).json({"message":"Unable to add to the database ","Status":config.ERROR});
+                                    }
+                            else{
+                                res.status(200).json({"message":"Added to database Successfully","Status":config.SUCCESS,"data":allVouchers});
+                                allVouchers.length=0;
+                                    }
+                    });
+                    }
+                })
+            }
+        })
     },
     getVoucherData(res) {
-        voucherModel.find({},(err,data)=> {
+        voucherModel.find({currentStatus:true},(err,data)=> {
             if(err) {
                 res.status(500).json({"status":config.ERROR,"message":"Error while finding the data in the vouchers "});
             }

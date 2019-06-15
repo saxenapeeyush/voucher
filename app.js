@@ -4,6 +4,7 @@ const app = express();
 app.use(bodyParser.urlencoded({extended:false}));
 app.use(bodyParser.json());
 app.use('/',require('./api/voucherApi'));
+app.use('/template',require('./api/templateApi'));
 app.listen(process.env.PORT || 4321 , (err)=> {
     if(err) {
         console.log("Error while loading the backend server at 4321");
